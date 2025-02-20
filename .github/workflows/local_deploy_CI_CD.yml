@@ -37,7 +37,16 @@ jobs:
           $ZIP_NAME = "$PROJECT_NAME.zip"
           $LOCAL_PATH = "C:\Users\vivek\source\repos\githubProjects"
 
-          if (-Not (Test-Path $LOCAL_PATH)) { New-Item -ItemType Directory -Path $LOCAL_PATH }
+          # if (-Not (Test-Path $LOCAL_PATH)) { New-Item -ItemType Directory -Path $LOCAL_PATH }
+
+          # Ensure the directory exists
+          if (-Not (Test-Path $LOCAL_PATH)) { New-Item -ItemType Directory -Path $LOCAL_PATH -Force | Out-Null}
+          
+          # Ensure the directory creation was successful
+          if (-Not (Test-Path $LOCAL_PATH)) {
+              Write-Host "Error: Failed to create directory $LOCAL_PATH"
+              exit 1
+          }
 
           Compress-Archive -Path * -DestinationPath "$LOCAL_PATH\$ZIP_NAME" -Force
 
@@ -59,7 +68,16 @@ jobs:
           echo "Deploying from: $LOCAL_PATH\$LATEST_ZIP"
           echo "Extracting to: $DEPLOY_PATH"
 
-          if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH }
+          # if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH }
+
+          # Ensure the directory exists
+          if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH -Force | Out-Null}
+          
+          # Ensure the directory creation was successful
+          if (-Not (Test-Path $DEPLOY_PATH)) {
+              Write-Host "Error: Failed to create directory $DEPLOY_PATH"
+              exit 1
+          }
 
           Expand-Archive -Path "$LOCAL_PATH\$LATEST_ZIP" -DestinationPath $DEPLOY_PATH -Force
 
