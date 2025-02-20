@@ -24,6 +24,7 @@ jobs:
           venv\Scripts\activate
           python.exe -m pip install --upgrade pip
           pip install --no-cache-dir -r requirements.txt
+          pip install --no-cache-dir -r backend/requirements.txt
 
       # - name: Run Tests
       #   run: |
@@ -70,4 +71,5 @@ jobs:
           python -m venv venv
           venv\Scripts\activate
           pip install --no-cache-dir -r requirements.txt
+          pip install --no-cache-dir -r backend/requirements.txt
           python app.py
