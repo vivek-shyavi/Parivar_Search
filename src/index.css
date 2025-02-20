@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-scale {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.nav-link {
+  @apply relative text-gray-700 hover:text-orange-600 transition-colors duration-300;
+}
+
+.nav-link::after {
+  @apply content-[''] absolute left-0 bottom-[-2px] w-0 h-[2px] bg-orange-600 transition-all duration-300;
+}
+
+.nav-link:hover::after {
+  @apply w-full;
+}
+
+.btn-primary {
+  @apply bg-orange-600 text-white px-6 py-2 rounded-md transform transition-all duration-300 hover:bg-orange-700 hover:scale-105 hover:shadow-lg active:scale-95;
+}
+
+.first_name, .last_name, .email, .password {
+  @apply transition-all duration-300 border-2 border-gray-300 focus:border-orange-600 focus:ring focus:ring-orange-200 focus:ring-opacity-50 rounded-md;
+}
+
+.input-animated {
+  @apply transition-all duration-300 border-2 border-gray-300 focus:border-orange-600 focus:ring focus:ring-orange-200 focus:ring-opacity-50 rounded-md;
+}
+
+.startpage {
+  @apply text-3xl font-bold mb-4;
+}
