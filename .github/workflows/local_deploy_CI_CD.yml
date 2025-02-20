@@ -18,17 +18,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      # - name: Install Dependencies
-      #   run: |
-      #     python -m venv venv
-      #     venv\Scripts\activate
-      #     python.exe -m pip install --upgrade pip
-      #     pip install -r requirements.txt
-
-      - name: Run Tests
+      - name: Install Dependencies
         run: |
+          python -m venv venv
           venv\Scripts\activate
-          pytest
+          python.exe -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      # - name: Run Tests
+      #   run: |
+      #     venv\Scripts\activate
+      #     pytest
 
       - name: Create ZIP for Deployment (Local Machine)
         run: |
@@ -69,5 +69,5 @@ jobs:
           cd C:\Users\vivek\source\repos\githubDeployed\ParivarSearch
           python -m venv venv
           venv\Scripts\activate
-          pip install -r requirements.txt
+          pip install --no-cache-dir -r requirements.txt
           python app.py
