@@ -8,15 +8,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest  # Running on Windows
-    
+
     steps:
       - name: Checkout Repository (Pull latest code)
         uses: actions/checkout@v3
-
-      - name: Print GitHub Workspace Path
-        shell: pwsh
-        run: |
-          Write-Host "GitHub Workspace: ${{ github.workspace }}"
 
       - name: Set Up Python
         uses: actions/setup-python@v4
@@ -24,7 +19,6 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        shell: pwsh
         run: |
           python -m venv venv
           venv\Scripts\activate
@@ -32,58 +26,67 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           pip install --no-cache-dir -r backend/requirements.txt
 
-      - name: Create ZIP for Deployment
-        shell: pwsh
+      - name: Create ZIP for Deployment (Local Machine)
         run: |
           $PROJECT_NAME = "ParivarSearch"
           $ZIP_NAME = "$PROJECT_NAME.zip"
-          $DEPLOYMENT_PATH = "${{ github.workspace }}\Deployment"
+          $LOCAL_PATH = "C:\Users\vivek\source\repos\githubProjects"
 
-          # Ensure the Deployment directory exists
-          if (-Not (Test-Path $DEPLOYMENT_PATH)) { New-Item -ItemType Directory -Path $DEPLOYMENT_PATH -Force | Out-Null}
+          # Ensure the directory exists
+          if (-Not (Test-Path $LOCAL_PATH)) { New-Item -ItemType Directory -Path $LOCAL_PATH -Force | Out-Null}
+          
+          # Ensure the directory creation was successful
+          if (-Not (Test-Path $LOCAL_PATH)) {
+              Write-Host "Error: Failed to create directory $LOCAL_PATH"
+              exit 1
+          }
 
-          # Create ZIP archive
-          Compress-Archive -Path "${{ github.workspace }}\*" -DestinationPath "$DEPLOYMENT_PATH\$ZIP_NAME" -Force
+          Compress-Archive -Path * -DestinationPath "$LOCAL_PATH\$ZIP_NAME" -Force
 
-          Write-Host "ZIP file created at: $DEPLOYMENT_PATH\$ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Upload ZIP as Artifact (Download from GitHub)
-        uses: actions/upload-artifact@v3
+      - name: Upload Build Artifact  # FIXED - Updated to v4
+        uses: actions/upload-artifact@v4
         with:
-          name: ParivarSearch-ZIP
-          path: ${{ github.workspace }}\Deployment\ParivarSearch.zip
+          name: deployment-package
+          path: C:\Users\vivek\source\repos\githubProjects\ParivarSearch.zip
 
   deploy:
     needs: build
     runs-on: windows-latest
 
     steps:
-      - name: Download ZIP from Artifacts
-        uses: actions/download-artifact@v3
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
         with:
-          name: ParivarSearch-ZIP
+          name: deployment-package
           path: C:\Users\vivek\source\repos\githubProjects
 
       - name: Deploy Locally from ZIP
-        shell: pwsh
         run: |
           echo "Starting local deployment on Windows..."
 
           $LOCAL_PATH = "C:\Users\vivek\source\repos\githubProjects"
           $DEPLOY_PATH = "C:\Users\vivek\source\repos\githubDeployed"
-          $ZIP_NAME = "ParivarSearch.zip"
-          $ZIP_PATH = "$LOCAL_PATH\$ZIP_NAME"
+          $LATEST_ZIP = Get-ChildItem -Path $LOCAL_PATH -Filter "ParivarSearch.zip" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
-          # Ensure the deployment directory exists
+          echo "Deploying from: $LOCAL_PATH\$LATEST_ZIP"
+          echo "Extracting to: $DEPLOY_PATH"
+
+          # Ensure the directory exists
           if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH -Force | Out-Null}
           
-          # Extract ZIP
-          Expand-Archive -Path $ZIP_PATH -DestinationPath $DEPLOY_PATH -Force
+          # Ensure the directory creation was successful
+          if (-Not (Test-Path $DEPLOY_PATH)) {
+              Write-Host "Error: Failed to create directory $DEPLOY_PATH"
+              exit 1
+          }
 
-          Write-Host "Deployment completed successfully."
+          Expand-Archive -Path "$LOCAL_PATH\$LATEST_ZIP" -DestinationPath $DEPLOY_PATH -Force
+
+          echo "Deployment completed successfully."
 
       - name: Run Flask App
-        shell: pwsh
         run: |
           cd C:\Users\vivek\source\repos\githubDeployed\ParivarSearch
           python -m venv venv
