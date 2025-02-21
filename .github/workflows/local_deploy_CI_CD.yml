@@ -51,12 +51,18 @@ jobs:
 
       - name: Transfer ZIP to Local PC
         run: |
-         $LOCAL_PC_IP = "106.51.200.6"  # Replace with your local PC's IP
-         $LOCAL_USER = "vivek"  # Replace with your Windows username
-         $ZIP_PATH = "C:\Users\vivek\Downloads\project.zip"
-         $DEST_PATH = "\\$LOCAL_PC_IP\C$\Users\$LOCAL_USER\Downloads\project.zip"
+          $LOCAL_PC_IP = "192.168.0.104"  # Replace with your local PC's IP
+          $LOCAL_USER = "vivek"  # Replace with your local PC's username
+          $PASSWORD = "Vivek@1163"  # Replace with your password (or use a secret)
 
-         Copy-Item -Path $ZIP_PATH -Destination $DEST_PATH -ToSession (New-PSSession -ComputerName $LOCAL_PC_IP -Credential (Get-Credential)) -Force
+          # Convert password to a secure string
+          $SECURE_PASSWORD = ConvertTo-SecureString $PASSWORD -AsPlainText -Force
+          $CREDENTIAL = New-Object System.Management.Automation.PSCredential ($LOCAL_USER, $SECURE_PASSWORD)
+
+          $ZIP_PATH = "C:\Users\vivek\Downloads\project.zip"
+          $DEST_PATH = "\\$LOCAL_PC_IP\C$\Users\$LOCAL_USER\Downloads\project.zip"
+
+          Copy-Item -Path $ZIP_PATH -Destination $DEST_PATH -ToSession (New-PSSession -ComputerName $LOCAL_PC_IP -Credential $CREDENTIAL) -Force
         shell: pwsh
 
       - name: Extract & Start Flask App
