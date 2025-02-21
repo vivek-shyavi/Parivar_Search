@@ -1,36 +1,29 @@
 name: Deploy Flask App Locally
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: self-hosted
-    
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: Set PowerShell Execution Policy
-      run: |
-        Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-      shell: powershell
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r backend/requirements.txt
-      shell: powershell
-        
-    - name: Run Flask App
-      run: |
-        Start-Process python -ArgumentList "backend/app.py" -NoNewWindow
-      shell: powershell
+      - name: Install Python manually
+        run: |
+          curl -o python-3.10.11.exe https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe
+          python-3.10.11.exe /quiet InstallAllUsers=1 PrependPath=1
+        shell: cmd
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+        shell: cmd
+      
+      - name: Run Flask App
+        run: |
+          python backend/app.py
+        shell: cmd
