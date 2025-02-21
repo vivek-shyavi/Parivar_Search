@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repo
@@ -34,11 +34,11 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m venv venv
-          source venv/bin/activate
+          venv\Scripts\activate
           python.exe -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
-        shell: bash
+        shell: pwsh
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v4
@@ -49,7 +49,7 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: github.ref == 'refs/heads/main'
 
     steps:
