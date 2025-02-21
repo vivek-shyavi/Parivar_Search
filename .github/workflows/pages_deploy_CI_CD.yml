@@ -1,66 +1,42 @@
-name: Github Pages Build & Deploy
+name: Deploy Flask App to Windows PC
 
 on:
   push:
     branches:
-      - main
-      
+      - main  # Adjust branch if needed
 
 jobs:
-  build:
-    name: Build
+  deploy:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
+      - name: Zip the Project
+        run: Compress-Archive -Path * -DestinationPath flask_app.zip -Force
 
-      - name: Install dependencies
-        uses: bahmutov/npm-install@v1
-
-      - name: Build project
-        run: npm run build
-
-      - name: Set Up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install Dependencies
+      - name: Copy ZIP to Windows PC via PowerShell Remoting
         run: |
-          python -m venv venv
-          venv\Scripts\activate
-          python.exe -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r backend/requirements.txt
+          $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential (New-Object PSCredential("${{ secrets.WINDOWS_USER }}", (ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force)))
+          Copy-Item -Path flask_app.zip -Destination "C:\Users\${{ secrets.WINDOWS_USER }}\Downloads\flask_app.zip" -ToSession $session
         shell: pwsh
 
-      - name: Upload production-ready build files
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-files
-          path: ./build
-
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: windows-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: production-files
-          path: ./build
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          publish_dir: ./build
+      - name: Extract and Run Flask App
+        run: |
+          $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential (New-Object PSCredential("${{ secrets.WINDOWS_USER }}", (ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force)))
+          
+          Invoke-Command -Session $session -ScriptBlock {
+            Expand-Archive -Path "C:\Users\${{ secrets.WINDOWS_USER }}\Downloads\flask_app.zip" -DestinationPath "C:\Users\${{ secrets.WINDOWS_USER }}\flask_app" -Force
+            cd "C:\Users\${{ secrets.WINDOWS_USER }}\flask_app"
+            
+            python -m venv venv
+            .\venv\Scripts\Activate
+            
+            python.exe -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install -r backend/requirements.txt
+            
+            python app.py
+          }
+        shell: pwsh
