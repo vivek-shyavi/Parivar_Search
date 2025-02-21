@@ -3,40 +3,61 @@ name: Deploy Flask App to Windows PC
 on:
   push:
     branches:
-      - main  # Adjust branch if needed
+      - main
 
 jobs:
   deploy:
     runs-on: windows-latest
-
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Zip the Project
-        run: Compress-Archive -Path * -DestinationPath flask_app.zip -Force
-
-      - name: Copy ZIP to Windows PC via PowerShell Remoting
-        run: |
-          $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential (New-Object PSCredential("${{ secrets.WINDOWS_USER }}", (ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force)))
-          Copy-Item -Path flask_app.zip -Destination "C:\Users\${{ secrets.WINDOWS_USER }}\Downloads\flask_app.zip" -ToSession $session
-        shell: pwsh
-
-      - name: Extract and Run Flask App
-        run: |
-          $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential (New-Object PSCredential("${{ secrets.WINDOWS_USER }}", (ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force)))
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Zip the Project
+      run: Compress-Archive -Path * -DestinationPath flask_app.zip -Force
+      
+    - name: Configure WinRM
+      run: |
+        Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.WINDOWS_IP }}" -Force
+      shell: pwsh
+      
+    - name: Copy ZIP to Windows PC via PowerShell Remoting
+      run: |
+        $securePassword = ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force
+        $credential = New-Object PSCredential("${{ secrets.WINDOWS_USER }}", $securePassword)
+        $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential $credential -UseSSL
+        Copy-Item -Path flask_app.zip -Destination "C:\Users\${{ secrets.WINDOWS_USER }}\Downloads\flask_app.zip" -ToSession $session
+      shell: pwsh
+      
+    - name: Extract and Run Flask App
+      run: |
+        $securePassword = ConvertTo-SecureString "${{ secrets.WINDOWS_PASSWORD }}" -AsPlainText -Force
+        $credential = New-Object PSCredential("${{ secrets.WINDOWS_USER }}", $securePassword)
+        $session = New-PSSession -ComputerName "${{ secrets.WINDOWS_IP }}" -Credential $credential -UseSSL
+        
+        Invoke-Command -Session $session -ScriptBlock {
+          $userPath = "C:\Users\$using:env:WINDOWS_USER"
           
-          Invoke-Command -Session $session -ScriptBlock {
-            Expand-Archive -Path "C:\Users\${{ secrets.WINDOWS_USER }}\Downloads\flask_app.zip" -DestinationPath "C:\Users\${{ secrets.WINDOWS_USER }}\flask_app" -Force
-            cd "C:\Users\${{ secrets.WINDOWS_USER }}\flask_app"
-            
-            python -m venv venv
-            .\venv\Scripts\Activate
-            
-            python.exe -m pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install -r backend/requirements.txt
-            
-            python app.py
+          # Clean up existing deployment if any
+          if (Test-Path "$userPath\flask_app") {
+            Remove-Item "$userPath\flask_app" -Recurse -Force
           }
-        shell: pwsh
+          
+          # Extract the ZIP
+          Expand-Archive -Path "$userPath\Downloads\flask_app.zip" -DestinationPath "$userPath\flask_app" -Force
+          
+          # Setup and run the Flask app
+          Set-Location "$userPath\flask_app"
+          if (Test-Path "venv") {
+            Remove-Item "venv" -Recurse -Force
+          }
+          python -m venv venv
+          .\venv\Scripts\Activate
+          python.exe -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+          
+          # Start Flask app in background
+          Start-Process python -ArgumentList "app.py" -NoNewWindow
+        }
+      shell: pwsh
