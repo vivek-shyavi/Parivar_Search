@@ -1,16 +1,16 @@
-name: Flask CI/CD Pipeline - Localhost
+name: Flask CI/CD - Local Machine
 
 on:
   push:
     branches:
-      - main  # Trigger on push to main
+      - main  # Trigger on push to main branch
 
 jobs:
   build:
-    runs-on: windows-latest  # Running on Windows
+    runs-on: windows-latest  # GitHub-hosted Windows runner
 
     steps:
-      - name: Checkout Repository (Pull latest code)
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set Up Python
@@ -23,74 +23,57 @@ jobs:
           python -m venv venv
           venv\Scripts\activate
           python.exe -m pip install --upgrade pip
-          pip install --no-cache-dir -r requirements.txt
-          pip install --no-cache-dir -r backend/requirements.txt
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+        shell: pwsh
 
-      - name: Create ZIP for Deployment (Local Machine)
+      - name: Create ZIP for Deployment
         run: |
-          $PROJECT_NAME = "ParivarSearch"
-          $ZIP_NAME = "$PROJECT_NAME.zip"
-          $LOCAL_PATH = "C:\Users\vivek\source\repos\githubProjects"
+          Compress-Archive -Path * -DestinationPath project.zip -Force
+        shell: pwsh
 
-          # Ensure the directory exists
-          if (-Not (Test-Path $LOCAL_PATH)) { New-Item -ItemType Directory -Path $LOCAL_PATH -Force | Out-Null}
-          
-          # Ensure the directory creation was successful
-          if (-Not (Test-Path $LOCAL_PATH)) {
-              Write-Host "Error: Failed to create directory $LOCAL_PATH"
-              exit 1
-          }
-
-          Compress-Archive -Path * -DestinationPath "$LOCAL_PATH\$ZIP_NAME" -Force
-
-          echo "ZIP_NAME=$ZIP_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Upload Build Artifact  # FIXED - Updated to v4
+      - name: Upload ZIP as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: deployment-package
-          path: C:\Users\vivek\source\repos\githubProjects\ParivarSearch.zip
+          name: deployment-zip
+          path: project.zip
 
   deploy:
     needs: build
-    runs-on: windows-latest
+    runs-on: windows-latest  # Still on GitHub-hosted Windows runner
 
     steps:
-      - name: Download Build Artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: deployment-package
-          path: C:\Users\vivek\source\repos\githubProjects
+          name: deployment-zip
+          path: C:\Users\vivek\Downloads  # Change this to your local path
 
-      - name: Deploy Locally from ZIP
+      - name: Transfer ZIP to Local PC
         run: |
-          echo "Starting local deployment on Windows..."
+         $LOCAL_PC_IP = "106.51.200.6"  # Replace with your local PC's IP
+         $LOCAL_USER = "vivek"  # Replace with your Windows username
+         $ZIP_PATH = "C:\Users\vivek\Downloads\project.zip"
+         $DEST_PATH = "\\$LOCAL_PC_IP\C$\Users\$LOCAL_USER\Downloads\project.zip"
 
-          $LOCAL_PATH = "C:\Users\vivek\source\repos\githubProjects"
+         Copy-Item -Path $ZIP_PATH -Destination $DEST_PATH -ToSession (New-PSSession -ComputerName $LOCAL_PC_IP -Credential (Get-Credential)) -Force
+        shell: pwsh
+
+      - name: Extract & Start Flask App
+        run: |
           $DEPLOY_PATH = "C:\Users\vivek\source\repos\githubDeployed"
-          $LATEST_ZIP = Get-ChildItem -Path $LOCAL_PATH -Filter "ParivarSearch.zip" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
-          echo "Deploying from: $LOCAL_PATH\$LATEST_ZIP"
-          echo "Extracting to: $DEPLOY_PATH"
+          # Ensure directory exists
+          if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH -Force | Out-Null }
 
-          # Ensure the directory exists
-          if (-Not (Test-Path $DEPLOY_PATH)) { New-Item -ItemType Directory -Path $DEPLOY_PATH -Force | Out-Null}
-          
-          # Ensure the directory creation was successful
-          if (-Not (Test-Path $DEPLOY_PATH)) {
-              Write-Host "Error: Failed to create directory $DEPLOY_PATH"
-              exit 1
-          }
+          Expand-Archive -Path "C:\Users\vivek\Downloads\project.zip" -DestinationPath $DEPLOY_PATH -Force
 
-          Expand-Archive -Path "$LOCAL_PATH\$LATEST_ZIP" -DestinationPath $DEPLOY_PATH -Force
-
-          echo "Deployment completed successfully."
-
-      - name: Run Flask App
-        run: |
-          cd C:\Users\vivek\source\repos\githubDeployed\ParivarSearch
+          # Activate Virtual Environment & Start Flask
+          cd $DEPLOY_PATH
           python -m venv venv
           venv\Scripts\activate
-          pip install --no-cache-dir -r requirements.txt
-          pip install --no-cache-dir -r backend/requirements.txt
+          python.exe -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
           python app.py
+        shell: pwsh
