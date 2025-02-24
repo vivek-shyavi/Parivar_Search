@@ -10,7 +10,7 @@ blinker==1.9.0
 celery==5.2.7
 certifi==2024.12.14
 charset-normalizer==3.4.1
-click==7.1.2
+click==8.1.2  # Updated to avoid conflicts
 click-aliases==1.0.1
 click-default-group==1.2.4
 click-didyoumean==0.3.1
@@ -83,7 +83,6 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 
 tabulate==0.8.10
-task==0.2.5
 toml==0.10.2
 typer==0.15.1
 typing_extensions==4.12.2
