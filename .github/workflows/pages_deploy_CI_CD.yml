@@ -60,6 +60,10 @@ jobs:
       - name: Print the Public URL
         run: echo "Ngrok URL is $URL"
 
-      - name: ✅ Test API Endpoint
+      - name: ✅ Test API Endpoint by PORT
         run: |
           curl -X GET "http://localhost:5000"
+
+      - name: ✅ Test API Endpoint by Ngrok URL
+        run: |
+          curl -X GET "$URL"
