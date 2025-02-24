@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest  # Runs on GitHub-hosted Ubuntu machine
 
     steps:
+      - name: Disable process cleanup
+        run: echo 'DISABLE_CLEANUP=true' >> $GITHUB_ENV
+  
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
 
