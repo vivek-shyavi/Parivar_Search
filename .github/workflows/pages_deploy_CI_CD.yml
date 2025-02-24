@@ -45,10 +45,12 @@ jobs:
           ngrok http 5000 > /dev/null &
           sleep 5  # Wait for ngrok to start
 
-      - name: 🔗 Get ngrok URL
-        id: ngrok_url
+      - name: 🔗 Get Ngrok Public URL
         run: |
-          echo "::set-output name=url::$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')"
+          echo "URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')" >> $GITHUB_ENV
+          
+      - name: Print the Public URL
+        run: echo "Ngrok URL is $URL"
 
       - name: ✅ Test API Endpoint
         run: |
