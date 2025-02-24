@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest  # Runs on GitHub-hosted Ubuntu machine
 
     steps:
-      - name: Disable process cleanup
-        run: echo 'DISABLE_CLEANUP=true' >> $GITHUB_ENV
   
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
@@ -29,16 +27,23 @@ jobs:
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
 
-      - name: 🚀 Start Flask App
-        run: |
-          source venv/bin/activate
-          nohup python backend/app.py &
-          sleep 10
-        env:
-          FLASK_ENV: production  # Set Flask environment variable
+      - name: Install tmux
+        run: sudo apt-get install -y tmux
 
-      - name: 🔍 Check Running Processes
-        run: ps aux | grep python
+      # - name: 🚀 Start Flask App
+      #   run: |
+      #     source venv/bin/activate
+      #     nohup python backend/app.py &
+      #     sleep 10
+      #   env:
+      #     FLASK_ENV: production  # Set Flask environment variable
+
+      - name: 🚀 Start Flask App in tmux
+        run: |
+          tmux new-session -d -s flask_session 'source venv/bin/activate && python backend/app.py'
+
+      # - name: 🔍 Check Running Processes
+      #   run: ps aux | grep python
 
       - name: 🌍 Install ngrok
         run: |
@@ -47,10 +52,16 @@ jobs:
           sudo apt update && sudo apt install ngrok
           ngrok config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
 
-      - name: 🔄 Start ngrok
-        run: |
-          nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
-          sleep 10  # Wait for ngrok to start
+      # - name: 🔄 Start ngrok
+      #   run: |
+      #     nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
+      #     sleep 10  # Wait for ngrok to start
+
+      - name: 🔄 Start ngrok in tmux
+        run: tmux new-session -d -s ngrok_session 'ngrok http 5000'
+
+      - name: ✅ Verify tmux sessions
+        run: tmux list-sessions
 
       - name: 🔍 Debug ngrok tunnel
         run: curl -s http://127.0.0.1:4040/api/tunnels | jq
