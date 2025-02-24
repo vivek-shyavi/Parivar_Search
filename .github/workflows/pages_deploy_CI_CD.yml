@@ -7,28 +7,32 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Uses your local machine as the runner
+    runs-on: self-hosted  # Your local machine as the runner
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Clones the repo to your local machine
+        uses: actions/checkout@v4  # Clones the repo
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5  # Installs/caches Python 3.10
         with:
-          python-version: '3.10'  # Adjust to your Python version (e.g., 3.9, 3.10)
+          python-version: '3.13'  # Specifies Python 3.10
+
+      - name: Verify Python version
+        run: python --version  # Confirms the version is set up
+        shell: cmd  # Ensures Windows compatibility
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Installs Flask and other dependencies
-          pip install -r backend/requirements.txt  # Installs Flask and other dependencies
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+        shell: cmd  # Consistent shell for Windows
 
       - name: Deploy Flask app to localhost
         run: |
-          # Stop any existing Flask process (optional, ignores if none running)
-          pkill -f "flask" || true
-          # Start the Flask app in the background
-          nohup python app.py &
+          taskkill /F /IM python.exe /FI "WINDOWTITLE eq flask*" 2>nul || true  # Stops existing Flask (Windows)
+          start /B python app.py  # Runs Flask in the background (Windows)
         env:
-          FLASK_APP: app.py  # Adjust if your app file is named differently
-          FLASK_ENV: production  # Optional: set to development if debugging
+          FLASK_APP: app.py
+          FLASK_ENV: production
+        shell: cmd  # Windows shell
