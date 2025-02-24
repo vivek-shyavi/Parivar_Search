@@ -48,7 +48,7 @@ jobs:
 
       - name: 🔗 Get Ngrok URL for Port 5000
         run: |
-          echo "URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr==\"http://localhost:5000\") | .public_url')" >> $GITHUB_ENV
+          echo "URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr=="http://localhost:5000") | .public_url')" >> $GITHUB_ENV
 
           
       - name: Print the Public URL
