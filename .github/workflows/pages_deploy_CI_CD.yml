@@ -27,23 +27,16 @@ jobs:
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
 
-      - name: Install tmux
-        run: sudo apt-get install -y tmux
-
-      # - name: 🚀 Start Flask App
-      #   run: |
-      #     source venv/bin/activate
-      #     nohup python backend/app.py &
-      #     sleep 10
-      #   env:
-      #     FLASK_ENV: production  # Set Flask environment variable
-
-      - name: 🚀 Start Flask App in tmux
+      - name: 🚀 Start Flask App
         run: |
-          tmux new-session -d -s flask_session 'source venv/bin/activate && python backend/app.py'
+          source venv/bin/activate
+          nohup python backend/app.py &
+          sleep 10
+        env:
+          FLASK_ENV: production  # Set Flask environment variable
 
-      # - name: 🔍 Check Running Processes
-      #   run: ps aux | grep python
+      - name: 🔍 Check Running Processes
+        run: ps aux | grep python
 
       - name: 🌍 Install ngrok
         run: |
@@ -52,13 +45,10 @@ jobs:
           sudo apt update && sudo apt install ngrok
           ngrok config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
 
-      # - name: 🔄 Start ngrok
-      #   run: |
-      #     nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
-      #     sleep 10  # Wait for ngrok to start
-
-      - name: 🔄 Start ngrok in tmux
-        run: tmux new-session -d -s ngrok_session 'ngrok http 5000'
+      - name: 🔄 Start ngrok
+        run: |
+          nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
+          sleep 10  # Wait for ngrok to start
 
       - name: ✅ Verify tmux sessions
         run: tmux list-sessions
@@ -69,8 +59,7 @@ jobs:
       - name: 🔗 Get Ngrok URL for Port 5000
         run: |
           echo "URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr=="http://localhost:5000") | .public_url')" >> $GITHUB_ENV
-
-          
+      
       - name: Print the Public URL
         run: echo "Ngrok URL is $URL"
 
@@ -81,3 +70,6 @@ jobs:
       - name: ✅ Test API Endpoint by Ngrok URL
         run: |
           curl -X GET "$URL"
+
+      - name: 🛑 Keep Job Running
+        run: tail -f /dev/null
