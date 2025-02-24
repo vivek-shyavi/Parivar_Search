@@ -54,4 +54,4 @@ jobs:
 
       - name: ✅ Test API Endpoint
         run: |
-          curl -X GET "${{ steps.ngrok_url.outputs.url }}/api/health"
+          curl -X GET "$URL/api/health"
