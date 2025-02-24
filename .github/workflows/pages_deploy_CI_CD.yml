@@ -43,7 +43,7 @@ jobs:
 
       - name: 🔄 Start ngrok
         run: |
-          ngrok http 5000 > /dev/null &
+          ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
           sleep 10  # Wait for ngrok to start
 
       - name: 🔗 Get Ngrok Public URL
