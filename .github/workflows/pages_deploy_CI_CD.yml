@@ -34,6 +34,9 @@ jobs:
         env:
           FLASK_ENV: production  # Set Flask environment variable
 
+      - name: 🔍 Check Running Processes
+        run: ps aux | grep python
+
       - name: 🌍 Install ngrok
         run: |
           curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
@@ -45,6 +48,9 @@ jobs:
         run: |
           ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
           sleep 10  # Wait for ngrok to start
+
+      - name: 🔍 Debug ngrok tunnel
+        run: curl -s http://127.0.0.1:4040/api/tunnels | jq
 
       - name: 🔗 Get Ngrok URL for Port 5000
         run: |
