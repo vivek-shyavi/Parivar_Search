@@ -27,6 +27,16 @@ jobs:
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
 
+      - name: 📦 Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: 📦 Install Node.js & npm Dependencies
+        run: |
+          npm install
+          npm run build  # Build frontend
+
       - name: 🚀 Start Flask App
         run: |
           source venv/bin/activate
@@ -34,6 +44,12 @@ jobs:
           sleep 10
         env:
           FLASK_ENV: production  # Set Flask environment variable
+
+      - name: 🔥 Start Frontend (Vite on Port 5173)
+        run: |
+          cd frontend
+          nohup npm run dev &
+          sleep 10
 
       - name: 🔍 Check Running Processes
         run: ps aux | grep python
@@ -47,22 +63,22 @@ jobs:
 
       - name: 🔄 Start ngrok
         run: |
-          nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
+          nohup ngrok http 5173 &
           sleep 10  # Wait for ngrok to start
 
       - name: 🔍 Debug ngrok tunnel
         run: curl -s http://127.0.0.1:4040/api/tunnels | jq
 
-      - name: 🔗 Get Ngrok URL for Port 5000
+      - name: 🔗 Get Ngrok URL for Port 5173
         run: |
-          echo "URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr=="http://localhost:5000") | .public_url')" >> $GITHUB_ENV
+          echo "URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr=="http://localhost:5173") | .public_url')" >> $GITHUB_ENV
       
       - name: Print the Public URL
         run: echo "Ngrok URL is $URL"
 
       - name: ✅ Test API Endpoint by PORT
         run: |
-          curl -X GET "http://localhost:5000"
+          curl -X GET "http://localhost:5173"
 
       - name: ✅ Test API Endpoint by Ngrok URL
         run: |
