@@ -46,9 +46,10 @@ jobs:
           ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
           sleep 10  # Wait for ngrok to start
 
-      - name: 🔗 Get Ngrok Public URL
+      - name: 🔗 Get Ngrok URL for Port 5000
         run: |
-          echo "URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')" >> $GITHUB_ENV
+          echo "URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[] | select(.config.addr==\"http://localhost:5000\") | .public_url')" >> $GITHUB_ENV
+
           
       - name: Print the Public URL
         run: echo "Ngrok URL is $URL"
