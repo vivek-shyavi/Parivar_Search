@@ -30,6 +30,7 @@ jobs:
         run: |
           source venv/bin/activate
           python backend/app.py &
+          sleep 10
         env:
           FLASK_ENV: production  # Set Flask environment variable
 
@@ -43,7 +44,7 @@ jobs:
       - name: 🔄 Start ngrok
         run: |
           ngrok http 5000 > /dev/null &
-          sleep 5  # Wait for ngrok to start
+          sleep 10  # Wait for ngrok to start
 
       - name: 🔗 Get Ngrok Public URL
         run: |
