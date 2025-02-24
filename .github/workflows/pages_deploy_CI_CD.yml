@@ -50,9 +50,6 @@ jobs:
           nohup ngrok http 5000 --log=stdout > ngrok.log 2>&1 &
           sleep 10  # Wait for ngrok to start
 
-      - name: ✅ Verify tmux sessions
-        run: tmux list-sessions
-
       - name: 🔍 Debug ngrok tunnel
         run: curl -s http://127.0.0.1:4040/api/tunnels | jq
 
