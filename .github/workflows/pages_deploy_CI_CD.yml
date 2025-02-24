@@ -47,7 +47,6 @@ jobs:
 
       - name: 🔥 Start Frontend (Vite on Port 5173)
         run: |
-          cd frontend
           nohup npm run dev &
           sleep 10
 
