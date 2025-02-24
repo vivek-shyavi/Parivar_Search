@@ -56,4 +56,4 @@ jobs:
 
       - name: ✅ Test API Endpoint
         run: |
-          curl -X GET "$URL/api/health"
+          curl -X GET "http://localhost:5000"
