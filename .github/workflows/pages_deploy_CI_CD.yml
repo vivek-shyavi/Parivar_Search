@@ -81,8 +81,7 @@ jobs:
 
       - name: 🚀 Start ngrok
         run: |
-          Start-Process -NoNewWindow -FilePath "C:\ngrok\ngrok.exe" -ArgumentList "http 5173"
-          Start-Sleep -s 10  # Wait for ngrok to start
+          & "C:\ngrok\ngrok.exe" http 5173
         shell: powershell
 
       # - name: 🔄 Start ngrok
