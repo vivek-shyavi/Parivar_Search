@@ -29,5 +29,6 @@ jobs:
 
       - name: 🚀 Start Flask App
         run: |
-          Start-Process -NoNewWindow -FilePath "venv\Scripts\python.exe" -ArgumentList "backend/app.py"
+          venv\Scripts\activate
+          python backend/app.py
         shell: powershell
