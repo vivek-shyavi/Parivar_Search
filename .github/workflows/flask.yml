@@ -31,10 +31,3 @@ jobs:
         run: |
           Start-Process -NoNewWindow -FilePath "venv\Scripts\python.exe" -ArgumentList "backend/app.py"
         shell: powershell
-
-      - name: 📡 Trigger Vite Workflow
-        run: |
-          gh workflow run vite.yml
-        env:
-          GH_TOKEN: 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
-        shell: bash
