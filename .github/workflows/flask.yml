@@ -28,8 +28,8 @@ jobs:
 
       - name: 🚀 Start Flask App
         run: |
-          venv\Scripts\activate
-          python backend/app.py
+          Start-Process -NoNewWindow -FilePath "venv\Scripts\python.exe" -ArgumentList "backend/app.py"
+          
   vite:
     runs-on: self-hosted  # Uses a self-hosted runner (Windows)
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: 🔥 Start Frontend (Vite on Port 5173)
         run: |
-          npm run dev -- --host
+          Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "run dev -- --host"
 
   ngrok:
     runs-on: self-hosted  # Uses a self-hosted runner (Windows)
@@ -58,7 +58,7 @@ jobs:
 
       - name: 🔄 Start ngrok
         run: |
-          C:\ngrok\ngrok.exe http 5173
+          Start-Process -NoNewWindow -FilePath "C:\ngrok\ngrok.exe" -ArgumentList "http 5173"
 
       - name: 🔍 Debug ngrok tunnel
         run: Invoke-RestMethod http://localhost:4040/api/tunnels | ConvertTo-Json -Depth 3
