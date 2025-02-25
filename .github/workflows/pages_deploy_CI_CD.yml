@@ -49,7 +49,7 @@ jobs:
 
       - name: 🔥 Start Frontend (Vite on Port 5173)
         run: |
-          Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "run dev"
+          Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "run dev -- --host"
           Start-Sleep -s 10
         shell: powershell
 
