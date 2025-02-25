@@ -38,20 +38,21 @@ jobs:
           npm run build  # Build frontend
         shell: powershell
 
-      - name: 🚀 Start Flask App
+      - name: 🚀 Start Flask App and Vite
         run: |
           venv\Scripts\activate
-          Start-Process -NoNewWindow -FilePath "python" -ArgumentList "backend/app.py"
+          Start-Job -ScriptBlock { python backend/app.py }
+          Start-Job -ScriptBlock { npm run dev -- --host }
           Start-Sleep -s 10
         shell: powershell
         env:
           FLASK_ENV: production
 
-      - name: 🔥 Start Frontend (Vite on Port 5173)
-        run: |
-          Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "run dev -- --host"
-          Start-Sleep -s 10
-        shell: powershell
+      # - name: 🔥 Start Frontend (Vite on Port 5173)
+      #   run: |
+      #     Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "run dev -- --host"
+      #     Start-Sleep -s 10
+      #   shell: powershell
 
       # - name: 🌍 Install ngrok
       #   run: |
