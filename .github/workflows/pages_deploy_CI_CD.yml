@@ -76,7 +76,7 @@ jobs:
 
       - name: 🔑 Authenticate ngrok
         run: |
-          $env:NGROK_PATH/ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
+          $env:NGROK_PATH\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
         shell: powershell
 
       - name: 🚀 Start ngrok
