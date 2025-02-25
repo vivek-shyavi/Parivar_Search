@@ -60,8 +60,8 @@ jobs:
       #     .\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
       #   shell: powershell
 
-      - name: 🔧 Setup ngrok
-        uses: antoniodalmedo/setup-ngrok@v1
+      - name: 🔗 Setup ngrok
+        uses: alexellis/ngrok-action@v3
         with:
           auth-token: "2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU"
 
