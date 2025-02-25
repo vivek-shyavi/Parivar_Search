@@ -40,15 +40,14 @@ jobs:
 
       - name: 🚀 Start Flask App and Vite
         run: |
-          venv\Scripts\activate
-          python backend/app.py
+          Start-Job -ScriptBlock { Invoke-Expression "venv\Scripts\python.exe backend/app.py" }
         shell: powershell
         env:
           FLASK_ENV: production
 
       - name: 🔥 Start Frontend (Vite on Port 5173)
         run: |
-          npm run dev -- --host
+          Start-Job -ScriptBlock { Invoke-Expression "npm run dev -- --host" }
         shell: powershell
 
       # - name: 🌍 Install ngrok
