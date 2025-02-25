@@ -53,12 +53,17 @@ jobs:
           Start-Sleep -s 10
         shell: powershell
 
-      - name: 🌍 Install ngrok
-        run: |
-          Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip" -OutFile "ngrok.zip"
-          Expand-Archive -Force ngrok.zip -DestinationPath .
-          .\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
-        shell: powershell
+      # - name: 🌍 Install ngrok
+      #   run: |
+      #     Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip" -OutFile "ngrok.zip"
+      #     Expand-Archive -Force ngrok.zip -DestinationPath .
+      #     .\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
+      #   shell: powershell
+
+      - name: 🔧 Setup ngrok
+        uses: antoniodalmedo/setup-ngrok@v1
+        with:
+          auth-token: "2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU"
 
       - name: 🔄 Start ngrok
         run: |
@@ -67,12 +72,12 @@ jobs:
         shell: powershell
 
       - name: 🔍 Debug ngrok tunnel
-        run: Invoke-RestMethod http://127.0.0.1:4040/api/tunnels | ConvertTo-Json -Depth 3
+        run: Invoke-RestMethod http://localhost:4040/api/tunnels | ConvertTo-Json -Depth 3
         shell: powershell
 
       - name: 🔗 Get Ngrok URL for Port 5173
         run: |
-          $ngrokUrl = (Invoke-RestMethod http://127.0.0.1:4040/api/tunnels).tunnels | Where-Object { $_.config.addr -eq "http://localhost:5173" } | Select-Object -ExpandProperty public_url
+          $ngrokUrl = (Invoke-RestMethod http://localhost:4040/api/tunnels).tunnels | Where-Object { $_.config.addr -eq "http://localhost:5173" } | Select-Object -ExpandProperty public_url
           echo "URL=$ngrokUrl" | Out-File -FilePath $env:GITHUB_ENV -Append
         shell: powershell
 
