@@ -65,23 +65,23 @@ jobs:
       #   with:
       #     auth-token: "2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU"
 
-      - name: 📥 Download and Install ngrok
-        run: |
-          $NGROK_PATH="${{ runner.tool_cache }}/ngrok"
-          New-Item -ItemType Directory -Path $NGROK_PATH -Force
-          Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip" -OutFile "$NGROK_PATH/ngrok.zip"
-          Expand-Archive -Force "$NGROK_PATH/ngrok.zip" -DestinationPath "$NGROK_PATH"
-          echo "NGROK_PATH=$NGROK_PATH" >> $GITHUB_ENV
-        shell: powershell
+      # - name: 📥 Download and Install ngrok
+      #   run: |
+      #     $NGROK_PATH="${{ runner.tool_cache }}/ngrok"
+      #     New-Item -ItemType Directory -Path $NGROK_PATH -Force
+      #     Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip" -OutFile "$NGROK_PATH/ngrok.zip"
+      #     Expand-Archive -Force "$NGROK_PATH/ngrok.zip" -DestinationPath "$NGROK_PATH"
+      #     echo "NGROK_PATH=$NGROK_PATH" >> $GITHUB_ENV
+      #   shell: powershell
 
-      - name: 🔑 Authenticate ngrok
-        run: |
-          $env:NGROK_PATH\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
-        shell: powershell
+      # - name: 🔑 Authenticate ngrok
+      #   run: |
+      #     $env:NGROK_PATH\ngrok.exe config add-authtoken 2tU3frY659G3mYbdEBWdcRoypPT_34GtcPGRig8fxB9fj7ngU
+      #   shell: powershell
 
       - name: 🚀 Start ngrok
         run: |
-          Start-Process -NoNewWindow -FilePath "$env:NGROK_PATH/ngrok.exe" -ArgumentList "http 5173"
+          Start-Process -NoNewWindow -FilePath "C:\ngrok\ngrok.exe" -ArgumentList "http 5173"
           Start-Sleep -s 10  # Wait for ngrok to start
         shell: powershell
 
