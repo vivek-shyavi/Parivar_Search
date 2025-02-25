@@ -21,7 +21,7 @@ jobs:
 
       - name: 🔄 Start ngrok
         run: |
-          Start-Process -NoNewWindow -FilePath "C:\ngrok\ngrok.exe" -ArgumentList "http 5173"
+          C:\ngrok\ngrok.exe http 5173
         shell: powershell
 
       - name: 🔍 Debug ngrok tunnel
