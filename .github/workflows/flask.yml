@@ -1,0 +1,40 @@
+name: Deploy Flask App
+
+on:
+  push:
+    branches:
+      - main  # Runs when code is pushed to main
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # Uses a self-hosted runner (Windows)
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m venv venv
+          venv\Scripts\activate
+          python.exe -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
+        shell: powershell
+
+      - name: 🚀 Start Flask App
+        run: |
+          Start-Process -NoNewWindow -FilePath "venv\Scripts\python.exe" -ArgumentList "backend/app.py"
+        shell: powershell
+
+      - name: 📡 Trigger Vite Workflow
+        run: |
+          gh workflow run vite.yml
+        env:
+          GH_TOKEN: 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
+        shell: bash
