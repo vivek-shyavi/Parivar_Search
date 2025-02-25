@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Runs on GitHub-hosted Ubuntu machine
+    runs-on: ubuntu-latest  # Runs on GitHub-hosted Ubuntu machine
 
     steps:
   
